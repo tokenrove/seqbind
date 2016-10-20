@@ -45,6 +45,12 @@ transform(Fun, State, Forms, Context) when is_list(Forms) ->
                                           seqvars = In
                                         }, 
                              Form, Context),
+               L = maybe_hd(State1#state.seqvars),
+               lists:foreach(fun ({SVName, 0}) ->
+                                     io:fwrite(user, "~p:~p:~p: warning: ~p unnecessarily uses seqbind~n", [parse_trans:context(module, Context), parse_trans:context(function, Context), element(2, Form), SVName]);
+                                 (_) -> ok
+                             end,
+                             [proplists:lookup(P, L) || P <- proplists:get_keys(L)]),
                {Form1, Rec, State1#state{
                               scope = maybe_tl(State1#state.scope),
                               seqvars = Out(State1#state.seqvars) 
